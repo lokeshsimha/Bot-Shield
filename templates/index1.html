@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Behavior Tracking on Real-Time</title>
+    <script src="/static/tracking.js" defer></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: #f5f5f5;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            width: 250px;
+            height: calc(100vh - 60px);
+            background: #ffffff;
+            transform: translateX(0);
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            padding: 20px 0;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            z-index: 999;
+        }
+
+        .sidebar.active {
+            transform: translateX(-250px);
+        }
+
+        .main-content {
+            margin-left: 250px;
+            padding: 80px 20px 20px 20px;
+            transition: all 0.3s ease;
+            width: calc(100% - 250px);
+        }
+
+        .main-content.sidebar-active {
+            margin-left: 0;
+            width: 100%;
+        }
+
+        .sidebar-toggle {
+            position: relative;
+            background: transparent;
+            color: #333;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .sidebar-toggle i {
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar.active ~ * .sidebar-toggle i {
+            transform: rotate(180deg);
+        }
+
+        .header .sidebar-toggle {
+            margin-right: 10px;
+        }
+
+        body.dark-theme .sidebar {
+            background: #2d2d2d;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .sidebar ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .sidebar ul li {
+            margin: 0;
+            padding: 0;
+        }
+
+        .sidebar ul li a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 24px;
+            color: #333;
+            text-decoration: none;
+            transition: background-color 0.2s;
+        }
+
+        .sidebar ul li a:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .sidebar ul li a i {
+            width: 20px;
+            height: 20px;
+        }
+
+        .sidebar ul li a p {
+            margin: 0;
+            font-size: 14px;
+        }
+
+        .sidebar-section {
+            margin-bottom: 20px;
+        }
+
+        .sidebar-section-title {
+            padding: 12px 24px;
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .account-page {
+            padding: 24px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .account-tabs {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 12px;
+        }
+
+        .account-tab {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            color: #666;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .account-tab.active {
+            color: #000;
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .account-tab:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .account-section {
+            background: #fff;
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .account-section h2 {
+            margin: 0 0 16px 0;
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .account-section p {
+            color: #666;
+            margin: 0 0 24px 0;
+            font-size: 14px;
+        }
+
+        .profile-field {
+            margin-bottom: 16px;
+        }
+
+        .profile-field label {
+            display: block;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .profile-field input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .flash-messages {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2000;
+            width: 80%;
+            max-width: 600px;
+            padding: 15px 30px;
+            border-radius: 8px;
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.1);
+            font-weight: bold;
+            text-align: center;
+            animation: fade-out 5s ease-in-out forwards;
+        }
+
+        .flash-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .flash-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .flash-warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+
+        @keyframes fade-out {
+            0%, 80% { opacity: 1; }
+            100% { opacity: 0; visibility: hidden; }
+        }
+
+        .typing-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            margin-top: 10vmin;
+        }
+
+        #typing-box {
+            width: 80%;
+            max-width: 650px;
+            height: 150px;
+            border: 2px solid #ccc;
+            padding: 20px;
+            font-size: 18px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+            resize: none;
+            transition: all 0.3s;
+        }
+
+        #typing-box:focus {
+            outline: none;
+            border-color: #1e90ff;
+            box-shadow: 0 0 8px rgba(30, 144, 255, 0.6);
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .botBtn {
+            padding: 1rem 1.5rem;
+            background-color: #1e90ff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .botBtn:hover {
+            background-color: #104e8b;
+        }
+
+        .metrics {
+            position: fixed;
+            top: 10vmin;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            font-family: 'Roboto', sans-serif;
+            z-index: 1001;
+        }
+
+        .metric-box {
+            padding: 15px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 500;
+            color: #444;
+            text-align: center;
+        }
+
+        .content {
+            height: 3000px;
+            background: linear-gradient(to bottom, #fff, #eef6ff);
+            padding: 20px 0;
+            width: 100%;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background-color: #333;
+            color: white;
+            font-size: 14px;
+            width: 100%;
+            position: relative;
+            justify-self: flex-end;
+            align-self: flex-end;
+            bottom: 0;
+        }   
+
+        .footer a {
+            color: #1e90ff;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        #chatbot-icon {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            z-index: 1002;
+            transition: transform 0.3s ease;
+        }
+
+        #chatbot-icon:hover {
+            transform: scale(1.1);
+        }
+
+        #chatbot-window {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 400px;
+            height: 500px;
+            background: #000;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            display: none;
+            flex-direction: column;
+            z-index: 1003;
+            font-size: 15px;
+        }
+
+        .chatbot-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: #f3f3f3;
+            color: black;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            border: 3px solid #333;
+        }
+
+        .chatbot-header .logo {
+            display: flex;
+            align-items: center;
+            font-size: 20px;
+            font-weight: bold;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .chatbot-header .logo img {
+            height: 24px;
+            margin-right: 10px;
+        }
+
+        .chatbot-header .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .chatbot-body {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #000;
+            color: #fff;
+        }
+
+        .chatbot-message {
+            margin-bottom: 15px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #fff;
+            line-height: 1.4;
+        }
+
+        .chatbot-message span {
+            font-size: 14px;
+        }
+
+        .chatbot-footer {
+            background: #fff;
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+        }
+
+        .chatbot-input {
+            display: flex;
+            align-items: center;
+            background: #f0f0f0;
+            border-radius: 25px;
+            padding: 10px 15px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .chatbot-input input {
+            flex: 1;
+            border: none;
+            background: none;
+            outline: none;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .chatbot-input input::placeholder {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .user-message {
+            padding: 3px 3px 3px 10px;
+            border-radius: 10px;
+            background-color: #444;
+            color: #fff;
+        }
+
+        .chatbot-input button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+            color: #333;
+        }
+
+        .moon {
+            color: #000;
+        }
+        
+        .sun {
+            color: #fff;
+        }
+
+        /* Theme Switcher and Profile Styles */
+        .theme-switch {
+            position: relative;
+            width: 80px;
+            height: 36px;
+            background: linear-gradient(to right, #ffd700, #ffb74d 45%, #424242 55%, #212121);
+            border-radius: 25px;
+            cursor: pointer;
+            padding: 4px;
+            border: 2px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.4s ease;
+            overflow: hidden;
+        }
+
+        .theme-switch::before {
+            content: '';
+            position: absolute;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #fff;
+            left: 4px;
+            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 2;
+        }
+
+        body.dark-theme .theme-switch {
+            background: linear-gradient(to right, #424242, #212121 45%, #1a1a1a 55%, #000);
+            border-color: #666;
+        }
+
+        body.dark-theme .theme-switch::before {
+            transform: translateX(44px);
+            background: #424242;
+        }
+
+        .theme-switch i {
+            font-size: 20px;
+            z-index: 1;
+            transition: all 0.4s ease;
+            position: relative;
+        }
+
+        .theme-switch .sun-icon {
+            margin-left: 6px;
+            color: #ff9800;
+            transform-origin: center;
+            transition: transform 0.4s ease, color 0.4s ease;
+        }
+
+        .theme-switch .moon-icon {
+            margin-right: 6px;
+            color: #fff;
+            transform-origin: center;
+            transition: transform 0.4s ease, color 0.4s ease;
+        }
+
+        body.dark-theme .theme-switch .sun-icon {
+            color: #424242;
+            transform: scale(0.8);
+        }
+
+        body.dark-theme .theme-switch .moon-icon {
+            color: #fff;
+            transform: scale(1.2);
+        }
+
+        .theme-switch:hover::before {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .theme-profile-container {
+            position: relative;
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .theme-toggle, .profile-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: background-color 0.3s;
+        }
+
+        .theme-toggle i, .profile-toggle i {
+            font-size: 24px;
+            color: #333;
+        }
+
+        body.dark-theme .theme-toggle i,
+        body.dark-theme .profile-toggle i {
+            color: #fff;
+        }
+
+        body.dark-theme .theme-switch:hover,
+        body.dark-theme .profile-toggle:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .profile-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 10px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        body.dark-theme .profile-dropdown {
+            background: #2d2d2d;
+            border-color: #3d3d3d;
+        }
+
+        .profile-info {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        body.dark-theme .profile-info {
+            border-bottom: 1px solid #444;
+        }
+
+        .profile-email {
+            font-size: 14px;
+            color: #666;
+        }
+
+        body.dark-theme .profile-email {
+            color: #aaa;
+        }
+
+        /* Header styles */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #fff;
+            border-bottom: 1px solid #e0e0e0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            height: 60px;
+        }
+
+        .header .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-left: 10px;
+        }
+
+        .header .logo img {
+            height: 30px;
+            width: auto;
+        }
+
+        /* Dark theme styles */
+        body.dark-theme {
+            background-color: #1a1a1a;
+            color: #fff;
+        }
+
+        body.dark-theme .header {
+            background: #2d2d2d;
+            border-bottom-color: #3d3d3d;
+        }
+
+        body.dark-theme .sidebar {
+            background: #2d2d2d;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+        }
+
+        body.dark-theme .sidebar-section-title {
+            color: #999;
+        }
+
+        body.dark-theme .sidebar ul li a {
+            color: #fff;
+        }
+
+        body.dark-theme .sidebar ul li a:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        body.dark-theme .account-page {
+            color: #fff;
+        }
+
+        body.dark-theme .account-tab {
+            color: #999;
+        }
+
+        body.dark-theme .account-tab.active {
+            color: #fff;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body.dark-theme .account-tab:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        body.dark-theme .account-section {
+            background: #2d2d2d;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        body.dark-theme .account-section p {
+            color: #999;
+        }
+
+        body.dark-theme .profile-field label {
+            color: #999;
+        }
+
+        body.dark-theme .profile-field input {
+            background: #1a1a1a;
+            border-color: #3d3d3d;
+            color: #fff;
+        }
+
+        body.dark-theme .profile-field input:focus {
+            border-color: #4d4d4d;
+            outline: none;
+        }
+
+        body.dark-theme .account-tabs {
+            border-bottom-color: #3d3d3d;
+        }
+
+        /* Ensure smooth transitions */
+        .sidebar,
+        .main-content {
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <button id="sidebar-toggle" class="sidebar-toggle">
+            <i data-lucide="menu"></i>
+        </button>
+        <div class="logo">
+            <img src="./static/images/cyber-attack.png" alt="image">
+            <span><h2>Bot Shield</h2></span>
+        </div>
+        <div class="theme-profile-container">
+            <button class="theme-switch" onclick="toggleTheme()">
+                <i data-lucide="sun" class="sun-icon"></i>
+                <i data-lucide="moon" class="moon-icon"></i>
+            </button>
+            <div style="position: relative;">
+                <button class="profile-toggle" onclick="toggleProfile()">
+                    <i data-lucide="user"></i>
+                </button>
+                <div class="profile-dropdown" id="profileDropdown">
+                    <div class="profile-info">
+                        <div>{{ session['user_name'] }}</div>
+                        <div class="profile-email">{{ session['user_email'] }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash-messages flash-{{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-section">
+            <div class="sidebar-section-title">Menu</div>
+            <ul>
+                <li><a href="/starter"><i data-lucide="home"></i><p>Home</p></a></li>
+                <li><a href="/dashboard"><i data-lucide="layout-dashboard"></i><p>Dashboard</p></a></li>
+                <li><a href="/about"><i data-lucide="info"></i><p>About</p></a></li>
+            </ul>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-section-title">Settings</div>
+            <ul>
+                <li><a href="/account"><i data-lucide="user"></i><p>Account</p></a></li>
+            </ul>
+        </div>
+        <div style="margin-top: auto;">
+            <ul>
+                <li><a href="/logout" class="signout-btn"><i data-lucide="log-out"></i><p>Sign out</p></a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="main-content">
+        {% if request.endpoint == 'account' %}
+        <div class="account-page">
+            <div class="account-tabs">
+                <a href="#profile" class="account-tab active"><i data-lucide="user"></i> Profile</a>
+        
+            </div>
+            <div class="account-section">
+                <h2>Profile</h2>
+                <p>Your profile information.</p>
+                <div class="profile-field">
+                    <label>Name</label>
+                    <input type="text" value="{{ session['user_name'] }}" readonly>
+                </div>
+                <div class="profile-field">
+                    <label>Email</label>
+                    <input type="email" value="{{ session['user_email'] }}" readonly>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <br>
+        <br>
+        <br>
+        <div style="text-align: center;">
+            <h1>Welcome to Bot Shield</h1>
+            <p class="content-description"><h3>Interact with the page to generate behavior metrics.</h3></p>
+        </div>
+        {% endif %}
+        <div class="typing-section">
+            <div class="input-label">Type in the box below to calculate your typing speed:</div>
+            <br>
+            <textarea id="typing-box" placeholder="Start typing here..."></textarea>
+            <div class="button-container">
+                <button onclick="startTypingBot()" class="botBtn">Start Bot</button>
+            </div>
+        </div>
+
+        <div class="metrics">
+            <div class="metric-box" id="typing-speed">Typing Speed: 0 ms/keystroke</div>
+            <div class="metric-box" id="scroll-speed">Scroll Speed: 0 px/s</div>
+            <div class="metric-box" id="timer">Time Remaining: 30s</div>
+        </div>
+        
+        <div style="height: 500vh;"></div>
+        <div class="footer">
+            &copy; 2024 Behavior Tracker. All rights reserved. <br>
+            <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a>
+        </div>
+    </div>
+
+    <div id="chatbot-window">
+        <div class="chatbot-header">
+            <div class="logo">
+                <div>
+                    <span style="text-align: center;">BD-Chatbot</span>
+                </div>
+                <div style="font-size: medium;">
+                    Hi there <span>&#128075;</span><br>
+                    How can we help?
+                </div>
+            </div>
+            <button class="close-btn" onclick="toggleChatbot()">×</button>
+        </div>
+        <div class="chatbot-body">
+        </div>
+        <div class="chatbot-footer">
+            <div class="chatbot-input">
+                <input type="text" placeholder="Send us a message">
+                <button>➤</button>
+            </div>
+        </div>
+    </div>
+    <img src="./static/images/Chatbot.png" id="chatbot-icon" alt="Chatbot">
+
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+    <script>
+        document.getElementById("sidebar-toggle").addEventListener("click", function () {
+            const sidebar = document.getElementById("sidebar");
+            const mainContent = document.querySelector(".main-content");
+            sidebar.classList.toggle("active");
+            mainContent.classList.toggle("sidebar-active");
+            
+            // Store sidebar state in localStorage
+            localStorage.setItem('sidebarClosed', sidebar.classList.contains('active'));
+        });
+
+        // Initialize sidebar state from localStorage
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById("sidebar");
+            const mainContent = document.querySelector(".main-content");
+            const sidebarClosed = localStorage.getItem('sidebarClosed') === 'true';
+            
+            if (sidebarClosed) {
+                sidebar.classList.add('active');
+                mainContent.classList.add('sidebar-active');
+            }
+        });
+
+        lucide.createIcons();
+
+        // Theme switcher functionality
+        function toggleTheme() {
+            document.body.classList.toggle('dark-theme');
+            const theme = document.body.classList.contains('dark-theme') ? 'dark' : 'light';
+            localStorage.setItem('theme', theme);
+        }
+
+        // Profile dropdown
+        function toggleProfile() {
+            document.getElementById('profileDropdown').classList.toggle('show');
+        }
+
+        // Close profile dropdown when clicking outside
+        window.addEventListener('click', function(e) {
+            if (!e.target.matches('.profile-toggle') && !e.target.matches('.profile-toggle *')) {
+                const dropdown = document.getElementById('profileDropdown');
+                if (dropdown.classList.contains('show')) {
+                    dropdown.classList.remove('show');
+                }
+            }
+        });
+
+        let typingTimer;
+        let scrollTimer;
+        let lastTypingTime = Date.now();
+        let lastScrollTime = Date.now();
+        let typedCharacters = 0;
+        let scrollDistance = 0;
+        let lastScrollY = window.scrollY;
+        let sessionStartTime = Date.now();
+        let totalTypingSpeed = 0;
+        let typingCount = 0;
+        let totalScrollingSpeed = 0;
+        let scrollingCount = 0;
+        const username = 'user_' + Math.floor(Math.random() * 1000);
+        const sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+
+        async function sendBehaviorData(typing_speed, scroll_speed) {
+            try {
+                const response = await fetch('/api/behavior', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        typing_speed: typing_speed,
+                        scroll_speed: scroll_speed,  // Send scroll speed
+                        suspicious_count: 0,  // Will be updated in tracking.js
+                        paste_count: 0,  // Will be updated in tracking.js
+                        is_logout: false
+                    })
+                });
+                const data = await response.json();
+                console.log('Behavior data sent:', data);
+                
+                if (typing_speed > 0) {
+                    totalTypingSpeed += typing_speed;
+                    typingCount++;
+                }
+                if (scroll_speed > 0) {
+                    totalScrollingSpeed += scroll_speed;
+                    scrollingCount++;
+                }
+
+                if (data.prediction === 'Bot') {
+                    console.log('Bot detected:', data.reasons);
+                    await handleLogout();
+                }
+            } catch (error) {
+                console.error('Error sending behavior data:', error);
+            }
+        }
+
+        async function handleLogout() {
+            try {
+                const response = await fetch('/logout', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'}
+                });
+                if (response.ok) {
+                    window.location.href = '/login';
+                }
+            } catch (error) {
+                console.error('Logout failed:', error);
+            }
+        }
+
+        document.addEventListener('input', function(e) {
+            typedCharacters++;
+            
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(function() {
+                const currentTime = Date.now();
+                const timeElapsed = (currentTime - lastTypingTime) / 1000;
+                const wordsTyped = typedCharacters / 5;
+                const typingSpeed = timeElapsed > 0 ? (wordsTyped / timeElapsed) * 60 : 0;
+                
+                if (typingSpeed > 0) {
+                    sendBehaviorData(typingSpeed, 0);
+                }
+                
+                typedCharacters = 0;
+                lastTypingTime = currentTime;
+            }, 2000);
+        });
+
+        document.addEventListener('scroll', function(e) {
+            const currentTime = Date.now();
+            const timeElapsed = (currentTime - lastScrollTime) / 1000;
+            const currentScrollY = window.scrollY;
+            scrollDistance += Math.abs(currentScrollY - lastScrollY);
+            lastScrollY = currentScrollY;
+            
+            clearTimeout(scrollTimer);
+            scrollTimer = setTimeout(function() {
+                const scrollingSpeed = timeElapsed > 0 ? scrollDistance / timeElapsed : 0;
+                
+                if (scrollingSpeed > 0) {
+                    sendBehaviorData(0, scrollingSpeed);
+                }
+                
+                scrollDistance = 0;
+                lastScrollTime = currentTime;
+            }, 1000);
+        });
+
+        function getRandomText() {
+            const words = ["lorem", "ipsum", "dolor", "sit", "amet", "consectetur", "adipiscing", "elit", "sed", "do", "eiusmod", "tempor", "incididunt", "ut", "labore", "et", "dolore", "magna", "aliqua"];
+            return words[Math.floor(Math.random() * words.length)];
+        }
+
+        function simulateTyping(text) {
+            const textarea = document.getElementById("typing-box");
+            const event = new KeyboardEvent('keydown', {
+                key: text[text.length - 1],
+                code: 'Key' + text[text.length - 1].toUpperCase(),
+                bubbles: true
+            });
+            textarea.value += text;
+            textarea.dispatchEvent(event);
+            textarea.scrollTop = textarea.scrollHeight;
+        }
+
+        function startTypingBot() {
+            let textarea = document.getElementById("typing-box");
+            textarea.value = "";
+            let typingSpeed = 50;
+            let typingDuration = 30000;
+            let startTime = Date.now();
+
+            let interval = setInterval(() => {
+                if (Date.now() - startTime > typingDuration) {
+                    clearInterval(interval);
+                    return;
+                }
+                const text = getRandomText() + " ";
+                simulateTyping(text);
+            }, typingSpeed);
+        }
+
+        setTimeout(() => {
+            window.location.href = '/dashboard';
+        }, 30000);
+
+        // Chatbot toggle functionality
+        function toggleChatbot() {
+            const chatbotWindow = document.getElementById('chatbot-window');
+            chatbotWindow.style.display = chatbotWindow.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        document.getElementById('chatbot-icon').addEventListener('click', toggleChatbot);
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const inputField = document.querySelector(".chatbot-input input");
+            const sendButton = document.querySelector(".chatbot-input button");
+            const chatbotBody = document.querySelector(".chatbot-body");
+
+            function sendMessage() {
+                const userMessage = inputField.value.trim();
+                if (userMessage === "") return;
+
+                // Display user message
+                const userMessageDiv = document.createElement("div");
+                userMessageDiv.classList.add("user-message");
+                userMessageDiv.textContent = userMessage;
+                chatbotBody.appendChild(userMessageDiv);
+
+                // Clear input field
+                inputField.value = "";
+
+                // Send message to backend
+                fetch("/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ query: userMessage })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const botMessageDiv = document.createElement("div");
+                    botMessageDiv.classList.add("chatbot-message", "bot-message");
+                    botMessageDiv.textContent = data.answer;
+                    chatbotBody.appendChild(botMessageDiv);
+                    chatbotBody.scrollTop = chatbotBody.scrollHeight;
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    const errorMessageDiv = document.createElement("div");
+                    errorMessageDiv.classList.add("chatbot-message", "bot-message");
+                    errorMessageDiv.textContent = "Error connecting to the server. Please try again.";
+                    chatbotBody.appendChild(errorMessageDiv);
+                    chatbotBody.scrollTop = chatbotBody.scrollHeight;
+                });
+            }
+
+            sendButton.addEventListener("click", sendMessage);
+            inputField.addEventListener("keypress", function (event) {
+                if (event.key === "Enter") sendMessage();
+            });
+        });
+    </script>
+</body>
+</html>

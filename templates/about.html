@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - User Behavior Tracking</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: #1A1A1A;
+            color: #FFFFFF;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Navigation */
+        .nav {
+            background-color: #1A1A1A;
+            padding: 15px 20px;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid #333;
+        }
+
+        .nav-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            color: #FFFFFF; /* Already white, matches the requirement */
+            font-size: 1.5em;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .nav-logo img {
+            width: 30px;
+            height: 30px;
+            margin-right: 10px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-links a {
+            color: #FFFFFF;
+            text-decoration: none;
+            font-size: 1em;
+            font-weight: 400;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: #00FF85;
+        }
+
+        .nav-ctas {
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-ctas a {
+            text-decoration: none;
+            font-size: 1em;
+            padding: 8px 20px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-ctas .demo {
+            color: #FFFFFF;
+            background: transparent;
+            border: 1px solid #FFFFFF;
+        }
+
+        .nav-ctas .demo:hover {
+            background: #FFFFFF;
+            color: #1A1A1A;
+        }
+
+        .nav-ctas .start {
+            color: #1A1A1A;
+            background: #00FF85;
+            font-weight: 500;
+        }
+
+        .nav-ctas .start:hover {
+            background: #00CC6A;
+        }
+
+        /* Cookie Consent Popup */
+        .cookie-popup {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: #2A2A2A;
+            color: #FFFFFF;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 400px;
+            z-index: 2000;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            display: none;
+        }
+
+        .cookie-popup p {
+            font-size: 0.9em;
+            margin-bottom: 15px;
+        }
+
+        .cookie-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .cookie-buttons button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+
+        .cookie-buttons .manage {
+            background: transparent;
+            color: #FFFFFF;
+            border: 1px solid #FFFFFF;
+        }
+
+        .cookie-buttons .manage:hover {
+            background: #FFFFFF;
+            color: #1A1A1A;
+        }
+
+        .cookie-buttons .accept {
+            background: #00FF85;
+            color: #1A1A1A;
+            font-weight: 500;
+        }
+
+        .cookie-buttons .accept:hover {
+            background: #00CC6A;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+                        linear-gradient(135deg, #000814, #001f3f, #5f00ba, #ff00ff, #00ffcc, #00ffff);
+            background-size: 400% 400%;
+            animation: gradientAnimation 10s ease infinite;
+            color: #FFFFFF;
+            padding: 120px 20px 60px;
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .hero-content-wrapper {
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .hero-content {
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 3.5em;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 20px;
+            background: linear-gradient(
+                to right,
+                #FFFFFF 10%,
+                #5f00ba 30%,
+                #ff00ff 50%,
+                #ff4500 70%,
+                #FFFFFF 90%
+            );
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            display: inline-block;
+        }
+
+        .hero p {
+            font-size: 1.2em;
+            opacity: 0.8;
+            margin-bottom: 30px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 12px 40px;
+            background: #00FF85;
+            color: #1A1A1A;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .cta-button:hover {
+            background: #00CC6A;
+        }
+
+        /* About Content Section Styles */
+        .about-content {
+            padding: 80px 0;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .section-title {
+            font-size: 2em;
+            color: #2c3e50;
+            margin: 30px 0 15px;
+            text-align: center;
+        }
+        
+        .features {
+            background-color: #f1f1f1;
+            border-radius: 8px;
+            padding: 25px;
+            margin: 30px 0;
+        }
+        
+        .features-title {
+            font-size: 1.5em;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .feature-list {
+            list-style-type: none;
+        }
+        
+        .feature-list li {
+            background-color: #e9ecef;
+            margin: 10px 0;
+            padding: 12px 15px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .feature-icon {
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+        
+        .footer {
+            background-color: #1A1A1A;
+            color: #fff;
+            text-align: center;
+            padding: 20px 0;
+        }
+        
+        /* Dark mode overrides */
+        @media (prefers-color-scheme: dark) {
+            .about-content {
+                background-color: #2d2d2d;
+                color: #f1f1f1;
+            }
+            
+            .section-title {
+                color: #e1e1e1;
+            }
+            
+            .features {
+                background-color: #3d3d3d;
+            }
+            
+            .features-title {
+                color: #e1e1e1;
+            }
+            
+            .feature-list li {
+                background-color: #4d4d4d;
+                color: #f1f1f1;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero {
+                padding: 100px 20px 40px;
+            }
+
+            .hero h1 {
+                font-size: 2.5em;
+            }
+
+            .hero p {
+                font-size: 1em;
+                margin: 0 auto 30px;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .nav-ctas {
+                gap: 10px;
+            }
+
+            .cookie-popup {
+                left: 10px;
+                right: 10px;
+                bottom: 10px;
+                max-width: none;
+            }
+
+            .cta-button {
+                padding: 10px 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-content">
+            <a href="/" class="nav-logo">
+                <img src="./static/images/cyber-attack2.png" alt="Bot Shield Logo">
+                Bot Shield
+            </a>
+            <div class="nav-ctas">
+                <a href="/login" class="start">Sign In</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Cookie Consent Popup -->
+    <div class="cookie-popup" id="cookiePopup">
+        <p>We’ve made some changes to the cookies we use on this site. We’ve added new cookies from Google and others to help us deliver ads and analytics data in light of user privacy laws. You can manage your cookie preferences below.</p>
+        <div class="cookie-buttons">
+            <button class="manage" onclick="manageCookies()">Manage</button>
+            <button class="accept" onclick="acceptCookies()">Accept</button>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content-wrapper">
+            <div class="hero-content">
+                <h1>Real-time Threat Detection: Using ML to Spot Suspicious User Behavior</h1>
+                <p>Bot Shield’s AI-driven platform empowers teams to seamlessly monitor, detect, and secure against threats at scale.</p>
+                <a href="/login" class="cta-button">Get Started</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Content Section -->
+    <section class="about-content">
+        <div class="container">
+            <h2 class="section-title">Who We Are</h2>
+            <p>Welcome to our User Behavior Tracking System, an advanced project powered by Machine Learning to monitor and analyze user activity. By using Decision Tree Algorithms, our system efficiently detects unusual or bot-like behavior based on mouse movements, keyboard interactions, and scrolling speed.</p>
+            
+            <h2 class="section-title">Why This Project?</h2>
+            <p>With increasing cybersecurity threats, ensuring secure and authorized access is crucial. Our project is designed to enhance user authentication and prevent unauthorized access by identifying abnormal behavior patterns.</p>
+            
+            <div class="features">
+                <h3 class="features-title">Key Features</h3>
+                <ul class="feature-list">
+                    <li><span class="feature-icon">📊</span> Real-time Behavior Analysis</li>
+                    <li><span class="feature-icon">💻</span> Decision Tree-Based Machine Learning Model</li>
+                    <li><span class="feature-icon">🔍</span> Detection of Anomalies & Unauthorized Access</li>
+                    <li><span class="feature-icon">⚡</span> Automated Alerts & Logouts for Unauthorized Users</li>
+                </ul>
+            </div>
+            
+            <h2 class="section-title">How It Works?</h2>
+            <p>Our system captures user interactions such as mouse movements, typing speed, scrolling speed, and clicks. Using Decision Tree Classification, it determines whether the behavior is normal or suspicious. If an anomaly is detected, the system triggers an alert and logs out the user automatically.</p>
+            
+            <h2 class="section-title">Join Us</h2>
+            <p>We aim to make the digital world safer by integrating AI-powered security solutions. Join us in our mission to create a secure and intelligent online experience.</p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p> 2025 User Behavior Tracking | Powered by Machine Learning & AI</p>
+        </div>
+    </footer>
+
+    <script>
+        // Cookie Popup Functionality
+        window.onload = function() {
+            const cookiePopup = document.getElementById('cookiePopup');
+            cookiePopup.style.display = 'block';
+        };
+
+        function acceptCookies() {
+            const cookiePopup = document.getElementById('cookiePopup');
+            cookiePopup.style.display = 'none';
+        }
+
+        function manageCookies() {
+            alert('Manage cookies functionality would be implemented here.');
+        }
+    </script>
+</body>
+</html>

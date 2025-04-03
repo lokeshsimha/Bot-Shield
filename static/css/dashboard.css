@@ -1,0 +1,231 @@
+body {
+    font-family: 'Poppins', sans-serif;
+    background: #f4f4f9;
+    margin: 0;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+nav {
+    background: #1e1e2f;
+    color: white;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.3s;
+}
+
+nav .logo {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 20px;
+}
+
+nav ul li a {
+    color: white;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+nav ul li a:hover {
+    color: #00bcd4;
+}
+
+nav ul li a.active {
+    color: #00bcd4;
+    border-bottom: 2px solid #00bcd4;
+}
+
+.container {
+    margin-top: 2rem;
+}
+
+.card {
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: 0.3s;
+    background: white;
+    color: #333;
+}
+
+.card:hover {
+    transform: scale(1.02);
+}
+
+.metric-label {
+    font-size: 1.2rem;
+    color: #666;
+}
+
+.metric-value {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #00bcd4;
+}
+
+.status-human { 
+    color: #10b981; 
+    font-weight: bold; 
+}
+
+.status-bot { 
+    color: #ef4444; 
+    font-weight: bold; 
+    animation: pulse 1.5s infinite;
+}
+
+.detection-card {
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.detection-card.bot-detected {
+    border-color: #ef4444;
+    background-color: #fff5f5;
+}
+
+.detection-card.human-detected {
+    border-color: #10b981;
+    background-color: #f0fdf4;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+.activity-row-bot {
+    background-color: #fff5f5 !important;
+}
+
+.activity-row-human {
+    background-color: #f0fdf4 !important;
+}
+
+#lastUpdate {
+    font-size: 0.8rem;
+    color: #666;
+    text-align: right;
+    margin-top: 1rem;
+}
+
+.shap-explanation {
+    font-size: 0.8rem;
+    color: #333;
+}
+
+.shap-explanation span {
+    display: block;
+}
+
+.dark-mode {
+    background-color: #121212;
+    color: #ffffff;
+}
+
+.dark-mode nav {
+    background-color: #1a1a1a;
+}
+
+.dark-mode .card {
+    background-color: #1e1e1e;
+    border-color: #333;
+    color: #ffffff;
+}
+
+.dark-mode .metric-value {
+    color: #00bcd4;
+}
+
+.dark-mode .table {
+    background-color: #1e1e1e;
+    color: #ffffff;
+}
+
+.dark-mode .table th,
+.dark-mode .table td {
+    border-color: #333;
+}
+
+.dark-mode .table-hover tbody tr:hover {
+    background-color: #2c2c2c;
+}
+
+.dark-mode .status-human {
+    color: #10b981;
+}
+
+.dark-mode .status-bot {
+    color: #ef4444;
+}
+
+.dark-mode .detection-card.bot-detected {
+    border-color: #ef4444;
+    background-color: #2c1e1e;
+}
+
+.dark-mode .detection-card.human-detected {
+    border-color: #10b981;
+    background-color: #1e2c1e;
+}
+
+.dark-mode #lastUpdate {
+    color: #999;
+}
+
+.dark-mode .shap-explanation {
+    color: #ccc;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.3s;
+    border-radius: 20px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: 0.3s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: #00bcd4;
+}
+
+input:checked + .slider:before {
+    transform: translateX(20px);
+}

@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+<style>
+    .account-page {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 24px;
+    }
+
+    .account-section {
+        background: #fff;
+        border-radius: 8px;
+        padding: 24px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .account-section h2 {
+        margin: 0 0 16px 0;
+        font-size: 20px;
+        font-weight: 500;
+    }
+
+    .account-section p {
+        color: #666;
+        margin: 0 0 24px 0;
+        font-size: 14px;
+    }
+
+    .profile-field {
+        margin-bottom: 16px;
+    }
+
+    .profile-field:last-child {
+        margin-bottom: 0;
+    }
+
+    .profile-field label {
+        display: block;
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 4px;
+    }
+
+    .profile-field input {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+        background: #f5f5f5;
+    }
+
+    /* Dark theme adjustments */
+    body.dark-theme .account-section {
+        background: #2d2d2d;
+    }
+
+    body.dark-theme .account-section p {
+        color: #999;
+    }
+
+    body.dark-theme .profile-field label {
+        color: #999;
+    }
+
+    body.dark-theme .profile-field input {
+        background: #1a1a1a;
+        border-color: #3d3d3d;
+        color: #fff;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="account-page">
+    <div class="account-section">
+        <h2>Profile</h2>
+        <p>Your profile information.</p>
+        <div class="profile-field">
+            <label>Name</label>
+            <input type="text" value="{{ session['user_name'] }}" readonly>
+        </div>
+        <div class="profile-field">
+            <label>Email</label>
+            <input type="email" value="{{ session['user_email'] }}" readonly>
+        </div>
+    </div>
+</div>
+{% endblock %}
