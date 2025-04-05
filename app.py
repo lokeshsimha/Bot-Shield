@@ -13,12 +13,14 @@ import urllib.parse
 
 # App password for sending emails
 app_password = "wyhw yrii mhen nhxg"  # Replace with your actual app password
+DATABASE = "database.db"
+
 
 app = Flask(__name__)
 app.secret_key = 'behavior'
 
 # Loading the trained model
-model = joblib.load("decision_tree_user1.pkl")
+model = joblib.load(r"C:\Users\lokes\Downloads\Botshield-mass\Botshield-main\decision_tree_user1.pkl")
 
 # Dictionaries to track failed attempts, lockouts, and email cooldowns
 email_cooldown = {}  # Store last email time for each user
@@ -43,7 +45,7 @@ def connect_to_db():
         return psycopg2.connect(
             dbname='mouse_patterns',
             user='postgres',
-            password='venky@123',
+            password='loke123',
             host='localhost',
             port=5432
         )
@@ -175,6 +177,67 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+def get_db_connection():
+    
+    conn = sqlite3.connect(DATABASE)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+def init_db():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL,
+            email TEXT UNIQUE NOT NULL
+        );
+    """)
+
+
+    conn.commit()
+    conn.close()
+
+
+def register():
+    """Register a new user"""
+    data = request.get_json()
+    print("📩 Received Data:", data) 
+
+    if not data:
+        return jsonify({"message": "No data received"}), 400
+
+    username = data.get("username")
+    password = data.get("password")
+    email = data.get("email")
+
+    if not username or not password or not email:
+        print("❌ Missing fields: Username, Password, or Email is empty")
+        return jsonify({"message": "Username, password, and email are required"}), 400
+
+    hashed_password = hash_password(password)
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("INSERT INTO users (username, password, email) VALUES (?, ?, ?)", 
+                       (username, hashed_password, email))
+        conn.commit()
+        print("✅ Registration successful!")
+        return jsonify({"message": "Registration successful"}), 201
+    except sqlite3.IntegrityError as e:
+        print("❌ Integrity Error:", e)
+        return jsonify({"message": "Username or email already exists"}), 400
+    except Exception as e:
+        print("❌ Unexpected Error:", e)
+        return jsonify({"message": "Internal server error"}), 500
+    finally:
+        conn.close()
+
+
 @app.route('/')
 def home():
     return render_template("about.html")
@@ -200,7 +263,7 @@ def login():
         if lockout_message not in flashed_messages:
             flash(lockout_message, 'danger')
     
-    return render_template("index.html", is_locked=is_locked, remaining_time=remaining_time)
+    return render_template("login.html", is_locked=is_locked, remaining_time=remaining_time)
 
 @app.route('/login_validation', methods=['POST'])
 def login_validation():
@@ -466,6 +529,9 @@ def send_email_alert(to_email, subject, body):
 @app.route("/about")
 def about():
     return render_template('about.html')
+@app.route("/register.html")
+def register():
+    return render_template('register.html')
 
 @app.route('/logout', methods=['GET'])
 def logout():

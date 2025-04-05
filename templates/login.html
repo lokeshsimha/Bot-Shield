@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Shield</title>
+    <style>
+        :root {
+            --primary-color: #1e88e5;
+            --secondary-color: #0d47a1;
+            --text-color: #333;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #000814, #001f3f, #5f00ba, #ff00ff, #00ffcc, #00ffff);
+            background-size: 400% 400%;
+            animation: gradientAnimation 10s ease infinite;
+        }
+
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .login-card {
+            background: rgba(49, 0, 78, 0.6);
+            backdrop-filter: blur(15px);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 1rem;
+        }
+
+        h2 {
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+
+        h2 span.welcome {
+            color: white;
+        }
+
+        h2 span.brand {
+            background: linear-gradient(135deg, #5f00ba, #00a2ff, #ff00ff, #5f00ba);
+            background-size: 300% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: textGradient 6s linear infinite;
+        }
+
+        @keyframes textGradient {
+            0% { filter: hue-rotate(0deg); }
+            50% { filter: hue-rotate(60deg); }
+            100% { filter: hue-rotate(0deg); }
+        }
+
+        .notification-container {
+            margin-bottom: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .notification {
+            padding: 0.8rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: white;
+            opacity: 0;
+            animation: fadeInOut 5s ease forwards;
+        }
+
+        .notification.error {
+            background-color: rgba(255, 82, 82, 0.8); /* Red for error */
+        }
+
+        .notification.success {
+            background-color: rgba(76, 175, 80, 0.8); /* Green for success */
+        }
+
+        .notification.info {
+            background-color: rgba(33, 150, 243, 0.8); /* Blue for info */
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateY(-10px); }
+            10% { opacity: 1; transform: translateY(0); }
+            90% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-10px); }
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .input-group input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        .forgot-password {
+            text-align: right;
+            margin-bottom: 1.5rem;
+        }
+
+        .forgot-password a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .sign-in-btn {
+            width: 100%;
+            padding: 0.8rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .sign-in-btn:hover {
+            background: var(--secondary-color);
+        }
+
+        .social-login {
+            margin-top: 2rem;
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .social-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #e0e0e0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .social-btn:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .register-link {
+            margin-top: 1.5rem;
+            color: #ffffff;
+            font-size: 0.9rem;
+        }
+
+        .register-link a {
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <img src="{{ url_for('static', filename='images/cyber-attack2.png') }}" alt="Logo" class="logo">
+        <h2><span class="welcome">Welcome to </span><span class="brand">Bot Shield</span></h2>
+        <div class="notification-container" id="notificationContainer"></div>
+        <form action="{{ url_for('login_validation') }}" method="POST">
+            <div class="input-group">
+                <input type="email" name="username" placeholder="Email" required>
+            </div>
+            <div class="input-group">
+                <input type="password" name="password" placeholder="Password" required>
+            </div>
+            
+            <button type="submit" class="sign-in-btn">Sign In</button>
+            <p onclick="window.location.href='register.html'">Sign Up </p>
+
+        </form>
+ 
+    </div>
+
+    <script>
+        // Define showNotification function first
+        function showNotification(message, category) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${category}`;
+            notification.textContent = message;
+            document.getElementById('notificationContainer').appendChild(notification);
+
+            // Slide in animation
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+
+            // Remove after 5 seconds
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    notification.remove();
+                }, 300);
+            }, 5000);
+        }
+        
+
+        // Handle flash messages after function is defined
+        const flashMessages = [
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        { "message": {{ message|tojson|safe }}, "category": {{ category|tojson|safe }}}{{ "," if not loop.last else "" }}
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        ];
+
+        // Show flash messages if any exist
+        flashMessages.forEach(flash => {
+            showNotification(flash.message, flash.category);
+        });
+
+        // Handle bot detection response
+        async function handleBotDetection(response) {
+            if (response && response.lockout) {
+                showNotification(response.message, 'error');
+            }
+        }
+    </script>
+    <script src="{{ url_for('static', filename='scripts/index.js') }}"></script>
+</body>
+</html>
